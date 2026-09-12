@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foto Jadi Bicara</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Foto Jadi Bicara</h1>
+    <p class="subtitle">Ubah foto menjadi video mengikuti audio</p>
+
+    <div class="card">
+
+        <label>🖼️ Pilih Foto</label>
+        <input type="file" id="photo" accept="image/*">
+
+        <img id="preview" class="preview">
+
+        <label>🎤 Pilih Audio</label>
+        <input type="file" id="audio" accept="audio/*">
+
+        <button id="createBtn">
+            🎬 BUAT VIDEO
+        </button>
+
+        <div id="status"></div>
+
+        <video id="result" controls></video>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
