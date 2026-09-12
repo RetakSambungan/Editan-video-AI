@@ -1,118 +1,35 @@
-import os
-import tempfile
-
-from flask import Flask, render_template, request, jsonify
+import streamlit as st
 import replicate
+import tempfile
+import os
 
+st.set_page_config(page_title="AI Video Generator")
+st.title("🎬 AI Video Generator")
+st.write("Upload foto + audio buat bikin video AI")
 
-app = Flask(__name__)
+# Ambil token dari Secrets
+try:
+    REPLICATE_API_TOKEN = st.secrets["REPLICATE_API_TOKEN"]
+    os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
+except:
+    st.warning("Belum set REPLICATE_API_TOKEN di Secrets")
 
+image_file = st.file_uploader("1. Upload Foto", type=["jpg", "jpeg", "png"])
+audio_file = st.file_uploader("2. Upload Audio", type=["mp3", "wav"])
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
-@app.route("/generate", methods=["POST"])
-def generate():
-
-    if "photo" not in request.files:
-        return jsonify({
-            "error": "Foto belum dipilih"
-        }), 400
-
-    if "audio" not in request.files:
-        return jsonify({
-            "error": "Audio belum dipilih"
-        }), 400
-
-    photo = request.files["photo"]
-    audio = request.files["audio"]
-
-    if photo.filename == "":
-        return jsonify({
-            "error": "Nama file foto kosong"
-        }), 400
-
-    if audio.filename == "":
-        return jsonify({
-            "error": "Nama file audio kosong"
-        }), 400
-
-
-    try:
-
-        # Simpan sementara file yang dikirim pengguna
-        photo_file = tempfile.NamedTemporaryFile(
-            suffix=".jpg",
-            delete=False
-        )
-
-        audio_file = tempfile.NamedTemporaryFile(
-            suffix=".wav",
-            delete=False
-        )
-
-        photo.save(photo_file.name)
-        audio.save(audio_file.name)
-
-        photo_file.close()
-        audio_file.close()
-
-
-        # Jalankan SadTalker
-        output = replicate.run(
-            "cjwbw/sadtalker:a519cc0cfebaaeade068b23899165a11ec76aaa1d2b313d40d214f204ec957a3",
-
-            input={
-                "source_image": open(photo_file.name, "rb"),
-                "driven_audio": open(audio_file.name, "rb"),
-
-                "use_enhancer": True,
-                "use_eyeblink": True,
-
-                "pose_style": 0,
-                "expression_scale": 1,
-
-                "preprocess": "crop",
-                "size_of_image": 256,
-
-                "facerender": "facevid2vid",
-                "still_mode": True
-            }
-        )
-
-
-        # URL video hasil
-        video_url = output.url
-
-
-        # Hapus file sementara
-        try:
-            os.remove(photo_file.name)
-            os.remove(audio_file.name)
-        except:
-            pass
-
-
-        return jsonify({
-            "video": video_url
-        })
-
-
-    except Exception as e:
-
-        print("ERROR:", str(e))
-
-        return jsonify({
-            "error": str(e)
-        }), 500
-
-
-if __name__ == "__main__":
-
-    port = int(
-        os.environ.get("PORT", 5000)
-    )
-
-
+if st.button("Generate Video"):
+    if image_file and audio_file:
+        with st.spinner("Lagi bikin video... tunggu 1-2 menit"):
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img:
+                tmp_img.write(image_file.read())
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_audio:
+                tmp_audio.write(audio_file.read())
+            
+            output = replicate.run(
+                "kandinsky-community/kandinsky-video", # ganti sama model kamu
+                input={"image": open(tmp_img.name, "rb"), "audio": open(tmp_audio.name, "rb")}
+            )
+            st.video(output)
+            st.success("Selesai!")
+    else:
+        st.error("Upload foto + audio dulu ya")
