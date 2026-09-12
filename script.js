@@ -1,11 +1,23 @@
-const photo = document.getElementById("photo");
-const audio = document.getElementById("audio");
-const preview = document.getElementById("preview");
-const createBtn = document.getElementById("createBtn");
-const status = document.getElementById("status");
-const result = document.getElementById("result");
+const photoInput = document.getElementById("photoInput");
+const audioInput = document.getElementById("audioInput");
 
-photo.addEventListener("change", function () {
+const photoPreview = document.getElementById("photoPreview");
+const audioPreview = document.getElementById("audioPreview");
+const audioName = document.getElementById("audioName");
+
+const generateButton = document.getElementById("generateButton");
+const status = document.getElementById("status");
+
+const resultCard = document.getElementById("resultCard");
+const resultVideo = document.getElementById("resultVideo");
+const downloadButton = document.getElementById("downloadButton");
+
+
+// =========================
+// PREVIEW FOTO
+// =========================
+
+photoInput.addEventListener("change", function () {
 
     const file = this.files[0];
 
@@ -13,63 +25,126 @@ photo.addEventListener("change", function () {
         return;
     }
 
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = "block";
+    const imageURL = URL.createObjectURL(file);
+
+    photoPreview.innerHTML = `
+        <img src="${imageURL}" alt="Foto yang dipilih">
+    `;
 });
 
-createBtn.addEventListener("click", async function () {
 
-    if (!photo.files[0]) {
-        alert("Pilih foto terlebih dahulu.");
+// =========================
+// PREVIEW AUDIO
+// =========================
+
+audioInput.addEventListener("change", function () {
+
+    const file = this.files[0];
+
+    if (!file) {
         return;
     }
 
-    if (!audio.files[0]) {
-        alert("Pilih audio terlebih dahulu.");
+    audioName.textContent = "Audio: " + file.name;
+
+    const audioURL = URL.createObjectURL(file);
+
+    audioPreview.src = audioURL;
+    audioPreview.style.display = "block";
+});
+
+
+// =========================
+// BUAT FOTO BERBICARA
+// =========================
+
+generateButton.addEventListener("click", async function () {
+
+    const photo = photoInput.files[0];
+    const audio = audioInput.files[0];
+
+    if (!photo) {
+        alert("Silakan pilih foto terlebih dahulu.");
         return;
     }
+
+    if (!audio) {
+        alert("Silakan pilih audio terlebih dahulu.");
+        return;
+    }
+
+
+    generateButton.disabled = true;
+
+    status.textContent =
+        "⏳ Sedang memproses foto dan audio...";
+
+    resultCard.style.display = "none";
+
 
     const formData = new FormData();
 
-    formData.append("photo", photo.files[0]);
-    formData.append("audio", audio.files[0]);
+    formData.append("photo", photo);
+    formData.append("audio", audio);
 
-    createBtn.disabled = true;
-    status.innerText = "Sedang memproses...";
 
     try {
 
-        const response = await fetch("/create-video", {
+        const response = await fetch("/generate", {
             method: "POST",
             body: formData
         });
 
+
         if (!response.ok) {
-            throw new Error("Gagal membuat video");
+
+            const errorText = await response.text();
+
+            throw new Error(
+                errorText || "Gagal membuat video."
+            );
         }
+
 
         const data = await response.json();
 
-        if (data.video) {
 
-            result.src = data.video;
-            result.style.display = "block";
+        if (!data.video) {
 
-            status.innerText = "Video berhasil dibuat!";
-
-        } else {
-
-            status.innerText = "Video belum tersedia.";
-
+            throw new Error(
+                "Server tidak mengembalikan video."
+            );
         }
+
+
+        // Tampilkan hasil video
+        resultVideo.src = data.video;
+
+        downloadButton.href = data.video;
+
+        resultCard.style.display = "block";
+
+        status.textContent =
+            "✅ Video berhasil dibuat!";
+
+
+        resultVideo.load();
 
     } catch (error) {
 
         console.error(error);
-        status.innerText =
-            "Terjadi kesalahan. Pastikan server berjalan.";
 
+        status.textContent =
+            "❌ Gagal membuat video.";
+
+        alert(
+            "Terjadi kesalahan:\n" +
+            error.message
+        );
+
+    } finally {
+
+        generateButton.disabled = false;
     }
 
-    createBtn.disabled = false;
 });
