@@ -4,9 +4,8 @@ import os
 import tempfile
 
 st.set_page_config(page_title="AI Video Generator")
-st.title("🎬 AI Video Generator - Foto Bisa Bicara")
+st.title("🎬 Bisa Bicara")
 
-# Ambil token dari Secrets
 os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_API_TOKEN"]
 
 image_file = st.file_uploader("1. Upload Foto Wajah", type=["jpg", "jpeg", "png"])
@@ -18,18 +17,17 @@ def save_temp_file(uploaded_file):
         return tmp.name
 
 if st.button("Generate Video"):
-    if image_file is not None and audio_file is not None:
-        with st.spinner("⏳ Lagi bikin video... tunggu 2-3 menit ya"):
+    if image_file and audio_file:
+        with st.spinner("⏳ Lagi bikin video... 2-3 menit"):
             try:
-                # Simpan file sementara biar bisa diupload ke Replicate
                 image_path = save_temp_file(image_file)
                 audio_path = save_temp_file(audio_file)
 
                 output = replicate.run(
-                    "lucataco/wav2lip:6c6bd8a",
+                    "mostudio/talking-photo:v2",
                     input={
-                        "face": open(image_path, "rb"),
-                        "audio": open(audio_path, "rb"),
+                        "image": open(image_path, "rb"),
+                        "audio": open(audio_path, "rb")
                     }
                 )
                 st.success("Selesai!")
