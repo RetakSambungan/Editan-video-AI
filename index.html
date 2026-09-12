@@ -2,41 +2,123 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foto Jadi Bicara</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Foto Bisa Bicara AI</title>
+
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <h1>Foto Jadi Bicara</h1>
-    <p class="subtitle">Ubah foto menjadi video mengikuti audio</p>
+        <header>
+            <h1>🎤 Foto Bisa Bicara AI</h1>
+            <p>Buat foto berbicara mengikuti audio</p>
+        </header>
 
-    <div class="card">
+        <main>
 
-        <label>🖼️ Pilih Foto</label>
-        <input type="file" id="photo" accept="image/*">
+            <!-- PILIH FOTO -->
+            <div class="card">
 
-        <img id="preview" class="preview">
+                <h2>1. Pilih Foto</h2>
 
-        <label>🎤 Pilih Audio</label>
-        <input type="file" id="audio" accept="audio/*">
+                <input
+                    type="file"
+                    id="photoInput"
+                    accept="image/*"
+                >
 
-        <button id="createBtn">
-            🎬 BUAT VIDEO
-        </button>
+                <div id="photoPreview" class="preview">
+                    <span>Belum ada foto</span>
+                </div>
 
-        <div id="status"></div>
+            </div>
 
-        <video id="result" controls></video>
+
+            <!-- PILIH AUDIO -->
+            <div class="card">
+
+                <h2>2. Pilih Audio</h2>
+
+                <input
+                    type="file"
+                    id="audioInput"
+                    accept="audio/*"
+                >
+
+                <div id="audioName">
+                    Belum ada audio
+                </div>
+
+                <audio
+                    id="audioPreview"
+                    controls
+                    style="display:none;">
+                </audio>
+
+            </div>
+
+
+            <!-- TOMBOL PROSES -->
+            <div class="card">
+
+                <button
+                    id="generateButton"
+                    type="button">
+
+                    🎬 Buat Foto Berbicara
+
+                </button>
+
+                <div
+                    id="status"
+                    class="status">
+                </div>
+
+            </div>
+
+
+            <!-- HASIL -->
+            <div
+                id="resultCard"
+                class="card"
+                style="display:none;">
+
+                <h2>3. Hasil Video</h2>
+
+                <video
+                    id="resultVideo"
+                    controls
+                    playsinline>
+                </video>
+
+                <br>
+
+                <a
+                    id="downloadButton"
+                    class="download"
+                    download="foto-berbicara.mp4">
+
+                    ⬇️ Simpan Video
+
+                </a>
+
+            </div>
+
+        </main>
+
+        <footer>
+            <p>Foto Bisa Bicara AI</p>
+        </footer>
 
     </div>
 
-</div>
 
-<script src="script.js"></script>
+    <script src="/static/script.js"></script>
 
 </body>
 </html>
